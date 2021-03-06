@@ -1,0 +1,73 @@
+version: '2'
+
+services:  
+  jenkins:
+    ## Build from dockerfile > grab plugins and start
+    build: .
+    container_name: jenkins
+    restart: always
+    stdin_open: true
+    tty: true
+    ports:
+      ## Only expose 8080 if running locally
+      ## Expose 28000 for connecting to external cluster nodes
+      - "8080:8080"
+      # - "28000"    
+    environment:
+      - VIRTUAL_PORT=8080
+      - VIRTUAL_HOST=localhost
+      - LETSENCRYPT_HOST=jenkins.martinmark.com
+      - LETSENCRYPT_EMAIL=email@martinmark.com
+      ## Jenkins Setup
+      - TZ=America/Montreal
+      ## Username / password > default login for Jenkins
+      - JENKINS_USER=username
+      - JENKINS_PASSWORD=password
+      - JENKINS_ADMIN_EMAIL=email@martinmark.com
+      - JENKINS_URL=localhost
+      - JENKINS_OPTS=--requestHeaderSize=500000
+      - JAVA_OPTS=-Djenkins.install.runSetupWizard=false
+      - CASC_JENKINS_CONFIG=/var/jenkins_conf
+      ## Sample credential > used in ./config-jenkins/config.yml
+      - GIT_USER=username
+      - GIT_PASSWORD=password
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./config-jenkins/config.yml:/var/jenkins_conf/conf.yml
+
+  ### nginx-proxy for adding a domain setup
+  ## Reverse proxy for domain
+  # nginx-proxy:
+  #   image: jwilder/nginx-proxy
+  #   container_name: nginx-proxy
+  #   restart: always
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - conf:/etc/nginx/conf.d
+  #     - vhost:/etc/nginx/vhost.d
+  #     - html:/usr/share/nginx/html
+  #     - dhparam:/etc/nginx/dhparam
+  #     - certs:/etc/nginx/certs:ro
+  #     - /var/run/docker.sock:/tmp/docker.sock:ro
+  
+  ## + LetsEncrypt HTTPS certs
+  # letsencrypt:
+  #   image: jrcs/letsencrypt-nginx-proxy-companion
+  #   container_name: nginx-proxy-le
+  #   restart: always
+  #   volumes_from:
+  #     - nginx-proxy
+  #   volumes:
+  #     - certs:/etc/nginx/certs:rw
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  ###
+
+volumes:
+  ## LetsEncrypt cert volumes
+  # conf:
+  # vhost:
+  # html:
+  # dhparam:
+  # certs:

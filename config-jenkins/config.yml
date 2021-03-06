@@ -1,0 +1,101 @@
+jenkins:
+  numExecutors: 2
+  mode: NORMAL
+  scmCheckoutRetryCount: 3
+
+  labelString: "main-label"  
+  labelAtoms:
+  - name: "main"
+  - name: "main-label"
+
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+       - id: ${JENKINS_USER}
+         password: ${JENKINS_PASSWORD}
+
+  authorizationStrategy:
+    globalMatrix:
+      permissions:
+        - "Overall/Read:anonymous"
+        - "Job/Read:anonymous"
+        - "View/Read:anonymous"
+        - "Overall/Administer:anonymous"
+
+  crumbIssuer:
+    standard:
+      excludeClientIPFromCrumb: false
+
+  remotingSecurity:
+    enabled: true    
+
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+        - usernamePassword:
+            scope:    GLOBAL
+            id:       github
+            username: ${GIT_USER}
+            password: ${GIT_PASSWORD}
+            description: GitHub
+
+tool:
+  git:
+    installations:
+      - name: Default
+        home: "git"
+
+unclassified:
+  location:
+    url: ${JENKINS_URL}
+    adminAddress: ${JENKINS_ADMIN_EMAIL}
+
+jobs:
+## See: https://jenkinsci.github.io/job-dsl-plugin/#path/pipelineJob for pipeline settings
+  - script: >
+      pipelineJob('LocalWorkingNotebook') {
+        description('Creates a local Jupyter notebook container and outputs an access token. Use for testing before adding notebook to repo.')
+        parameters {
+          stringParam('URL', 'localhost', 'Host domain used by the nginx-proxy for the Jupyter container.')
+        }
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote {
+                  url('https://github.com/mm-io/jenkins-data-lab.git')
+                  credentials('github')
+                }
+                branch('*/master')
+              }
+            }
+            scriptPath('jupyter/LocalWorkingNotebook.groovy')
+            lightweight()
+          }
+        }
+      }
+      
+  - script: >
+      pipelineJob('AdhocNotebook') {
+        description('Runs a specific Jupyter notebook in a container and saves the notebook artifact.')
+        parameters {
+          stringParam('filePath', '/jupyter/notebooks/HelloWorld.ipynb', 'Notebook file path from the source repo.')
+        }
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote {
+                  url('https://github.com/mm-io/jenkins-data-lab.git')
+                  credentials('github')
+                }
+                branch('*/master')
+              }
+            }
+            scriptPath('jupyter/AdhocNotebook.groovy')
+            lightweight()
+          }
+        }
+      }
