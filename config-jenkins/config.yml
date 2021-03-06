@@ -55,7 +55,7 @@ unclassified:
 jobs:
 ## See: https://jenkinsci.github.io/job-dsl-plugin/#path/pipelineJob for pipeline settings
   - script: >
-      pipelineJob('LocalWorkingNotebook') {
+      pipelineJob('LocalJupyterInstance') {
         description('Creates a local Jupyter notebook container and outputs an access token. Use for testing before adding notebook to repo.')
         parameters {
           stringParam('URL', 'localhost', 'Host domain used by the nginx-proxy for the Jupyter container.')
@@ -71,7 +71,7 @@ jobs:
                 branch('*/master')
               }
             }
-            scriptPath('jupyter/LocalWorkingNotebook.groovy')
+            scriptPath('jupyter/LocalJupyterInstance.groovy')
             lightweight()
           }
         }
