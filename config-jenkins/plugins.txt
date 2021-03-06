@@ -18,4 +18,5 @@ ssh-slaves:latest
 slack:latest
 text-finder:latest
 timestamper:latest
+workflow-aggregator:latest
 ws-cleanup:latest

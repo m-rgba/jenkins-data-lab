@@ -25,12 +25,13 @@ node{
             sh "docker exec ${runUUID}-jupyter papermill --progress-bar /home/martin/${runUUID}.ipynb /home/martin/${runUUID}-output.ipynb"
         }
     }
-    stage('Save Result Artifacts & Container Cleanup') {
+    stage('Save Result Artifacts & Cleanup') {
         sh "mkdir -p ${WORKSPACE}/artifacts/"
         sh "docker exec ${runUUID}-jupyter jupyter nbconvert --to html /home/martin/${runUUID}-output.ipynb"
         sh "docker cp ${runUUID}-jupyter:/home/martin/${runUUID}-output.html ${WORKSPACE}/artifacts/${runUUID}-output.html"
         archiveArtifacts "artifacts/*"
 
+        cleanWs()
         sh "docker stop ${runUUID}-jupyter || true"
         sh "docker rm -v ${runUUID}-jupyter || true"
     }
