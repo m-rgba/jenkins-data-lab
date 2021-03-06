@@ -68,7 +68,7 @@ jobs:
                   url('https://github.com/mm-io/jenkins-data-lab.git')
                   credentials('github')
                 }
-                branch('*/master')
+                branch('*/main')
               }
             }
             scriptPath('jupyter/LocalJupyterInstance.groovy')
@@ -91,7 +91,7 @@ jobs:
                   url('https://github.com/mm-io/jenkins-data-lab.git')
                   credentials('github')
                 }
-                branch('*/master')
+                branch('*/main')
               }
             }
             scriptPath('jupyter/AdhocNotebook.groovy')

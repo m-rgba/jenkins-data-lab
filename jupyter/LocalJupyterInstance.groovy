@@ -7,33 +7,6 @@ node{
             ${WORKSPACE}/jupyter \
             "
     }
-    stage('Create Jupyter Container') {
-        sh "docker stop jupyter || true"
-        sh "docker rm jupyter || true"
-        sh "docker run \
-            --name jupyter \
-            --restart=always \
-            -e VIRTUAL_PORT=8888 \
-            -e VIRTUAL_HOST=${params.URL} \
-            -e LETSENCRYPT_HOST=${params.URL} \
-            -e LETSENCRYPT_EMAIL=${JENKINS_ADMIN_EMAIL} \
-            -e JUPYTER_ENABLE_LAB=yes \
-            -p 8888:8888 \
-            -e NB_USER=martin \
-            -w /home/martin \
-            -d \
-            jupyter \
-            "
-    }
-}
-
-// Dropped out of node to release executor while asking for confirmation:
-// https://medium.com/faun/using-jenkins-input-step-correctly-2946bd2fd704
-timeout(time: 15, unit: "MINUTES") {
-    input message: 'Are you sure you want to copy over notebooks? Edited notebooks in the current container volume will be lost.', ok: 'Yes'
-}
-
-node {
     stage('Copy Over Notebooks') {
         sh "docker cp ${WORKSPACE}/jupyter/notebooks jupyter:/home/martin/repo-notebooks"
     }
@@ -52,5 +25,28 @@ node {
                 error "Waiting for Jupyter..."
             }
         }
+    }
+    // Dropped out of node to release executor while asking for confirmation:
+    // https://medium.com/faun/using-jenkins-input-step-correctly-2946bd2fd704
+    timeout(time: 15, unit: "MINUTES") {
+        input message: 'Are you sure you want to copy over notebooks? Edited notebooks in the current container volume will be lost.', ok: 'Yes'
+    }
+    stage('Create Jupyter Container') {
+        sh "docker stop jupyter || true"
+        sh "docker rm jupyter || true"
+        sh "docker run \
+            --name jupyter \
+            --restart=always \
+            -e VIRTUAL_PORT=8888 \
+            -e VIRTUAL_HOST=${params.URL} \
+            -e LETSENCRYPT_HOST=${params.URL} \
+            -e LETSENCRYPT_EMAIL=${JENKINS_ADMIN_EMAIL} \
+            -e JUPYTER_ENABLE_LAB=yes \
+            -p 8888:8888 \
+            -e NB_USER=martin \
+            -w /home/martin \
+            -d \
+            jupyter \
+            "
     }
 }

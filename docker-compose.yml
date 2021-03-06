@@ -64,8 +64,8 @@ services:
   #     - /var/run/docker.sock:/var/run/docker.sock:ro
   ###
 
-volumes:
-  ## LetsEncrypt cert volumes
+## LetsEncrypt cert volumes
+# volumes:
   # conf:
   # vhost:
   # html:
