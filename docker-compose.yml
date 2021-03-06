@@ -13,6 +13,9 @@ services:
       ## Expose 28000 for connecting to external cluster nodes
       - "8080:8080"
       # - "28000"    
+    ## Root > for compatibility on Macs
+    ## Disable and add Jenkins to the Docker user group on Linux `usermod -aG docker jenkins`
+    user: root
     environment:
       - VIRTUAL_PORT=8080
       - VIRTUAL_HOST=localhost
